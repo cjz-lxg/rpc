@@ -12,6 +12,6 @@ import lxg.cjz.rpc.test.provider.service.DemoService;
 @RpcService(interfaceClass = DemoService.class,
         interfaceClassName = "lxg.cjz.rpc.test.scanner.service.DemoService",
         version = "1.0.0",
-        group = "vjz")
+        group = "cjz")
 public class ProviderDemoServiceImpl {
 }

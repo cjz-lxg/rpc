@@ -31,8 +31,8 @@ public class RpcServiceScanner extends ClassScanner {
         classNameList.forEach((className) -> {
             try {
                 Class<?> clazz = Class.forName(className);
-                if (clazz.isAnnotation()) {
-                    RpcService rpcService = clazz.getAnnotation(RpcService.class);
+                RpcService rpcService = clazz.getAnnotation(RpcService.class);
+                if (rpcService != null) {
                     String serviceName = getServiceName(rpcService);
                     String key = serviceName.concat(rpcService.version()).concat(rpcService.group());
                     handlerMap.put(key, clazz.newInstance());
