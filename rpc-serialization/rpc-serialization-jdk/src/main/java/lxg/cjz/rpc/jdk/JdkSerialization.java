@@ -15,7 +15,7 @@ public class JdkSerialization implements Serialization {
     @Override
     public <T> byte[] serialize(T obj) {
         if (obj == null) {
-            throw new SerializerException("序列化对象为null")
+            throw new SerializerException("序列化对象为null");
         }
         try {
             ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -36,11 +36,10 @@ public class JdkSerialization implements Serialization {
             ByteArrayInputStream is = new ByteArrayInputStream(data);
             ObjectInputStream in = new ObjectInputStream(is);
             Object obj = in.readObject();
-            if (cls.isInstance(obj)) {
-                return cls.cast(obj);
-            } else {
+            if (!cls.isInstance(obj)) {
                 throw new Exception("反序列化对象与类型不匹配");
             }
+            return cls.cast(obj);
         } catch (Exception e) {
             throw new SerializerException(e.getMessage(), e);
         }
