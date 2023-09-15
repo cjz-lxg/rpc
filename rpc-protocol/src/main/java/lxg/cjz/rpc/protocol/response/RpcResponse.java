@@ -17,7 +17,7 @@ public class RpcResponse extends RpcMessage {
     /**
      * 异常信息
      */
-    private Exception exception;
+    private String exception;
 
     public Object getResult() {
         return result;
@@ -27,11 +27,11 @@ public class RpcResponse extends RpcMessage {
         this.result = result;
     }
 
-    public Exception getException() {
+    public String getException() {
         return exception;
     }
 
-    public void setException(Exception e) {
+    public void setException(String e) {
         this.exception = e;
     }
 }

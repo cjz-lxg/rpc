@@ -4,7 +4,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.util.JSONPObject;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import lxg.cjz.rpc.common.helper.RpcServiceHelper;
+import lxg.cjz.rpc.common.threadpool.ServerThreadPool;
 import lxg.cjz.rpc.protocol.RpcProtocol;
+import lxg.cjz.rpc.protocol.enumeration.RpcStatus;
 import lxg.cjz.rpc.protocol.enumeration.RpcType;
 import lxg.cjz.rpc.protocol.header.RpcHeader;
 import lxg.cjz.rpc.protocol.request.RpcRequest;
@@ -13,6 +16,7 @@ import lxg.cjz.rpc.serialization.api.Serialization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Method;
 import java.util.Map;
 
 /**
@@ -32,22 +36,64 @@ public class RpcProviderHandler extends SimpleChannelInboundHandler<RpcProtocol<
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, RpcProtocol<RpcRequest> protocol) throws Exception {
-        logger.info("RPC提供者收到的数据为====>>> " + JSONObject.toJSONString(protocol));
-        logger.info("handlerMap中存放的数据如下所示：");
-        for(Map.Entry<String, Object> entry : handlerMap.entrySet()){
-            logger.info(entry.getKey() + " === " + entry.getValue());
+        ServerThreadPool.submit(()->{
+            RpcHeader header = protocol.getHeader();
+            header.setMessageType((byte) RpcType.RESPONSE.getType());
+            RpcRequest request = protocol.getBody();
+            logger.debug("receive request: {}", header.getRequestId());
+            RpcProtocol<RpcResponse> responseRpcProtocol = new RpcProtocol<>();
+            RpcResponse response = new RpcResponse();
+            try {
+                Object result = handle(request);
+                response.setResult(result);
+                response.setAsync(request.isAsync());
+                response.setOneWay(request.isOneWay());
+                header.setStatus((byte) RpcStatus.SUCCESS.getCode());
+            } catch (Throwable throwable) {
+                response.setException(throwable.getMessage());
+                header.setStatus((byte) RpcStatus.FAIL.getCode());
+                logger.debug("rpc provider handle request error: ", throwable);
+            }
+            responseRpcProtocol.setHeader(header);
+            responseRpcProtocol.setBody(response);
+            ctx.writeAndFlush(responseRpcProtocol).addListener(future -> {
+                if (future.isSuccess()) {
+                    logger.debug("send response for request: {}", header.getRequestId());
+                } else {
+                    logger.error("send response for request {} error", header.getRequestId());
+                }
+            });
+        });
+    }
+
+    private Object handle(RpcRequest request) throws Throwable {
+        String serviceKey = RpcServiceHelper.buildServiceKey(request.getClassName(), request.getVersion(), request.getGroup());
+        Object serviceBean = handlerMap.get(serviceKey);
+        if(serviceBean == null){
+            throw new RuntimeException(String.format("service not exist: %s : %s", request.getClassName(), request.getMethodName()));
         }
-        RpcHeader header = protocol.getHeader();
-        RpcRequest rpcRequest = protocol.getBody();
-        header.setMessageType(((byte) RpcType.RESPONSE.getType()));
-        RpcProtocol<RpcResponse> rpcResponseRpcProtocol = new RpcProtocol<>();
-        RpcResponse rpcResponse = new RpcResponse();
-        rpcResponse.setResult("交互成功");
-        rpcResponse.setAsync(rpcRequest.isAsync());
-        rpcResponse.setOneWay(rpcRequest.isOneWay());
-        rpcResponseRpcProtocol.setHeader(header);
-        rpcResponseRpcProtocol.setBody(rpcResponse);
-        //直接返回数据
-        ctx.writeAndFlush(rpcResponseRpcProtocol);
+        Class<?> serviceClass = serviceBean.getClass();
+        String methodName = request.getMethodName();
+        Object[] parameters = request.getParameters();
+        Class<?>[] parameterTypes = request.getParameterTypes();
+        logger.debug(serviceClass.getName());
+        logger.debug(methodName);
+        if (parameterTypes != null){
+            for (Class<?> parameterType : parameterTypes) {
+                logger.debug(parameterType.getName());
+            }
+        }
+        if (parameters != null) {
+            for (Object parameter : parameters) {
+                logger.debug(parameter.toString());
+            }
+        }
+        return invokeMethod(serviceBean, serviceClass, methodName, parameterTypes, parameters);
+    }
+
+    private Object invokeMethod(Object serviceBean,Class<?> serviceClass, String methodName,Class<?>[] parameterTypes, Object[] parameters) throws Throwable {
+        Method method = serviceClass.getMethod(methodName, parameterTypes);
+        method.setAccessible(true);
+        return method.invoke(serviceBean, parameters);
     }
 }

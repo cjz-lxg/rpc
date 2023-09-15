@@ -1,6 +1,7 @@
 package lxg.cjz.rpc.common.scanner.server;
 
 import lxg.cjz.rpc.annotation.RpcService;
+import lxg.cjz.rpc.common.helper.RpcServiceHelper;
 import lxg.cjz.rpc.common.scanner.ClassScanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +35,7 @@ public class RpcServiceScanner extends ClassScanner {
                 RpcService rpcService = clazz.getAnnotation(RpcService.class);
                 if (rpcService != null) {
                     String serviceName = getServiceName(rpcService);
-                    String key = serviceName.concat(rpcService.version()).concat(rpcService.group());
+                    String key = RpcServiceHelper.buildServiceKey(serviceName, rpcService.version(), rpcService.group());
                     handlerMap.put(key, clazz.newInstance());
                 }
             } catch (Exception e) {
