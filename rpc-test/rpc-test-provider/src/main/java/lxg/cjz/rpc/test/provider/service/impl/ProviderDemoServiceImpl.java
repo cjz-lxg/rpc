@@ -1,7 +1,9 @@
 package lxg.cjz.rpc.test.provider.service.impl;
 
 import lxg.cjz.rpc.annotation.RpcService;
-import lxg.cjz.rpc.test.provider.service.DemoService;
+import lxg.cjz.rpc.test.api.DemoService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author russel
@@ -10,8 +12,15 @@ import lxg.cjz.rpc.test.provider.service.DemoService;
  * @description
  */
 @RpcService(interfaceClass = DemoService.class,
-        interfaceClassName = "lxg.cjz.rpc.test.scanner.service.DemoService",
+        interfaceClassName = "lxg.cjz.rpc.test.api.DemoService",
         version = "1.0.0",
         group = "cjz")
-public class ProviderDemoServiceImpl {
+public class ProviderDemoServiceImpl implements DemoService {
+
+    private static final Logger logger = LoggerFactory.getLogger(ProviderDemoServiceImpl.class);
+    @Override
+    public String hello(String name) {
+        logger.info("Hello {}.", name);
+        return "Hello " + name;
+    }
 }
