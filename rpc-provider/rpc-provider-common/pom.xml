@@ -28,6 +28,11 @@
             <artifactId>fastjson</artifactId>
             <version>1.2.83_noneautotype</version>
         </dependency>
+        <dependency>
+            <groupId>lxg.cjz.rpc</groupId>
+            <artifactId>rpc-constants</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

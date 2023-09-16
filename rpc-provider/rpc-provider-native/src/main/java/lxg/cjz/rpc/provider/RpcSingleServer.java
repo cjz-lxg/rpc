@@ -15,10 +15,10 @@ public class RpcSingleServer extends BaseServer {
 
     private final static Logger logger = LoggerFactory.getLogger(RpcSingleServer.class);
 
-    public RpcSingleServer(String serverAddress, String scanPackage) {
-        super(serverAddress);
+    public RpcSingleServer(String serverAddress, String scanPackage,String reflect) {
+        super(serverAddress,reflect);
         try {
-            this.handlerMap= RpcServiceScanner.doScannerWithRpcServiceAnnotationFilterAndRegistryService(scanPackage);
+            this.handlerMap = RpcServiceScanner.doScannerWithRpcServiceAnnotationFilterAndRegistryService(scanPackage);
         } catch (Exception e) {
             logger.error("RPC服务初始化错误=========>", e);
         }

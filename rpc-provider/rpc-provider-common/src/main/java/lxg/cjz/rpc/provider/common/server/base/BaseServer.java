@@ -11,6 +11,7 @@ import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import lxg.cjz.rpc.codec.RpcDecoder;
 import lxg.cjz.rpc.codec.RpcEncoder;
+import lxg.cjz.rpc.constants.RpcConstants;
 import lxg.cjz.rpc.provider.common.handler.RpcProviderHandler;
 import lxg.cjz.rpc.provider.common.server.api.Server;
 import org.slf4j.Logger;
@@ -34,10 +35,11 @@ public class BaseServer implements Server {
 
     protected String host = "127.0.0.1";
     protected int port = 27110;
+    protected String reflectType= RpcConstants.REFLECT_TYPE_JDK;
 
     protected Map<String, Object> handlerMap = new HashMap<>();
 
-    public BaseServer(String serverAddress) {
+    public BaseServer(String serverAddress,String reflectType) {
         if (!StringUtils.isEmpty(serverAddress)) {
             String[] addressArray = serverAddress.split(":");
             if (addressArray.length == 2) {
@@ -45,6 +47,7 @@ public class BaseServer implements Server {
                 port = Integer.parseInt(addressArray[1]);
             }
         }
+        this.reflectType = reflectType;
     }
 
     @Override
@@ -62,7 +65,7 @@ public class BaseServer implements Server {
                             socketChannel.pipeline()
                                     .addLast(new RpcDecoder())
                                     .addLast(new RpcEncoder())
-                                    .addLast(new RpcProviderHandler(handlerMap));
+                                    .addLast(new RpcProviderHandler(reflectType, handlerMap));
                         }
                     })
                     .option(ChannelOption.SO_BACKLOG, 128)

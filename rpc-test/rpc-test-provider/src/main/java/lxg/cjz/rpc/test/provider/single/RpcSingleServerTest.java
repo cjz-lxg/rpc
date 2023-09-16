@@ -1,5 +1,6 @@
 package lxg.cjz.rpc.test.provider.single;
 
+import lxg.cjz.rpc.constants.RpcConstants;
 import lxg.cjz.rpc.provider.RpcSingleServer;
 import org.junit.Test;
 
@@ -12,7 +13,7 @@ import org.junit.Test;
 public class RpcSingleServerTest {
     @Test
     public void startRpcSingleServer(){
-        RpcSingleServer singleServer = new RpcSingleServer("127.0.0.1:27880", "lxg.cjz.rpc.test");
+        RpcSingleServer singleServer = new RpcSingleServer("127.0.0.1:27880", "lxg.cjz.rpc.test", RpcConstants.REFLECT_TYPE_CGLIB);
         singleServer.startNettyServer();
     }
 }
