@@ -7,6 +7,7 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lxg.cjz.rpc.constants.RpcConstants;
+import lxg.cjz.rpc.consumer.common.common.future.RPCFuture;
 import lxg.cjz.rpc.protocol.RpcProtocol;
 import lxg.cjz.rpc.protocol.enumeration.RpcType;
 import lxg.cjz.rpc.protocol.header.RpcHeader;
@@ -33,7 +34,7 @@ public class RpcConsumerHandler extends SimpleChannelInboundHandler<RpcProtocol<
     private SocketAddress remotePeer;
 
     // 存放请求编号和响应对象之间的映射关系
-    private final Map<Long, RpcProtocol<RpcResponse>> pendingResponse = new ConcurrentHashMap<>();
+    private final Map<Long, RPCFuture> pendingRPC = new ConcurrentHashMap<>();
 
     public Channel getChannel() {
         return channel;
@@ -66,29 +67,34 @@ public class RpcConsumerHandler extends SimpleChannelInboundHandler<RpcProtocol<
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, RpcProtocol<RpcResponse> responseProtocol) throws Exception {
         if (responseProtocol == null || responseProtocol.getHeader().getMessageType() != RpcType.RESPONSE.getType()) {
-            throw new RpcException("rpc response is null");
+            throw new RpcException("rpc response is null or not response type");
         }
         logger.info("client receive msg:{}", JSONObject.toJSONString(responseProtocol));
         RpcHeader header = responseProtocol.getHeader();
         long requestId = header.getRequestId();
-        pendingResponse.put(requestId, responseProtocol);
+        RPCFuture rpcFuture = pendingRPC.remove(requestId);
+        if (rpcFuture != null) {
+            rpcFuture.done(responseProtocol);
+        }
     }
 
-    public Object sendRequest(RpcProtocol<RpcRequest> protocol) {
-        if (channel != null && channel.isActive()) {
-            logger.info("client send msg:{}", JSONObject.toJSONString(protocol));
-            channel.writeAndFlush(protocol);
-            RpcHeader header = protocol.getHeader();
-            while (true) {
-                RpcProtocol<RpcResponse> response = pendingResponse.get(header.getRequestId());
-                if (response != null) {
-                    return response.getBody().getResult();
-                }
-            }
-        } else {
+    public RPCFuture sendRequest(RpcProtocol<RpcRequest> protocol) {
+        if (channel == null || !channel.isActive()) {
             //TODO优化点:失败重试和失败抛出异常
             throw new RpcException("channel is not active or null");
         }
+        RPCFuture rpcFuture = this.getRpcFuture(protocol);
+        logger.info("client send msg:{}", JSONObject.toJSONString(protocol));
+        channel.writeAndFlush(protocol);
+        return rpcFuture;
+    }
+
+    private RPCFuture getRpcFuture(RpcProtocol<RpcRequest> protocol) {
+        RPCFuture rpcFuture = new RPCFuture(protocol);
+        RpcHeader header = protocol.getHeader();
+        long requestId = header.getRequestId();
+        pendingRPC.put(requestId, rpcFuture);
+        return rpcFuture;
     }
 
     public void close() {

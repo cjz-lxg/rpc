@@ -1,6 +1,7 @@
 package lxg.cjz.rpc.test.consumer.handler;
 
 import lxg.cjz.rpc.consumer.common.RpcConsumer;
+import lxg.cjz.rpc.consumer.common.common.future.RPCFuture;
 import lxg.cjz.rpc.protocol.RpcProtocol;
 import lxg.cjz.rpc.protocol.header.RpcHeaderFactory;
 import lxg.cjz.rpc.protocol.request.RpcRequest;
@@ -16,15 +17,15 @@ public class RpcConsumerHandlerTest {
     private static final Logger logger = org.slf4j.LoggerFactory.getLogger(RpcConsumerHandlerTest.class);
     public static void main(String[] args) throws Exception {
         RpcConsumer consumer = RpcConsumer.getInstance();
-        Object result = consumer.sendRequest(getRpcRequestProtocol());
+        RPCFuture result = consumer.sendRequest(getRpcRequestProtocol());
         logger.info("result:{}", result);
-        Thread.sleep(2000);
+        //Thread.sleep(2000);
         consumer.close();
     }
 
     private static RpcProtocol<RpcRequest> getRpcRequestProtocol() {
         //模拟发送数据
-        RpcProtocol<RpcRequest> protocol = new RpcProtocol<RpcRequest>();
+        RpcProtocol<RpcRequest> protocol = new RpcProtocol<>();
         protocol.setHeader(RpcHeaderFactory.getRequestHeader("jdk"));
         RpcRequest request = new RpcRequest();
         request.setClassName("lxg.cjz.rpc.test.api.DemoService");
