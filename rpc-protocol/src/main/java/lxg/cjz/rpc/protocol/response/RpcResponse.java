@@ -19,6 +19,10 @@ public class RpcResponse extends RpcMessage {
      */
     private String exception;
 
+    public boolean isException() {
+        return exception != null;
+    }
+
     public Object getResult() {
         return result;
     }

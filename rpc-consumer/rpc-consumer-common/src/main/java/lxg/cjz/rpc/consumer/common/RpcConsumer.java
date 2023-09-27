@@ -6,7 +6,8 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import lxg.cjz.rpc.consumer.common.common.future.RPCFuture;
+import lxg.cjz.rpc.common.threadpool.ClientThreadPool;
+import lxg.cjz.rpc.consumer.common.future.RPCFuture;
 import lxg.cjz.rpc.consumer.common.handler.RpcConsumerHandler;
 import lxg.cjz.rpc.consumer.common.initializer.RpcConsumerInitializer;
 import lxg.cjz.rpc.protocol.RpcProtocol;
@@ -53,6 +54,7 @@ public class RpcConsumer {
 
     public void close() {
         eventLoopGroup.shutdownGracefully();
+        ClientThreadPool.shutdown();
     }
 
     /**
@@ -73,7 +75,7 @@ public class RpcConsumer {
             handler=getRpcConsumerHandler(server,port);
             handlerMap.put(key,handler);
         }
-        return handler.sendRequest(protocol);
+        return handler.sendRequest(protocol, protocol.getBody().isAsync(), protocol.getBody().isOneWay());
     }
 
     private RpcConsumerHandler getRpcConsumerHandler(String server, int port) {

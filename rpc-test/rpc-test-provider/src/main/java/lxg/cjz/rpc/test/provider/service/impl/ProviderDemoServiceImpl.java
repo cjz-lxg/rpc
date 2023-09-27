@@ -20,7 +20,7 @@ public class ProviderDemoServiceImpl implements DemoService {
     private static final Logger logger = LoggerFactory.getLogger(ProviderDemoServiceImpl.class);
     @Override
     public String hello(String name) {
-        logger.info("Hello {}.", name);
+        logger.info("receive the argument:[{}]", name);
         return "Hello " + name;
     }
 }

@@ -6,8 +6,8 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import lxg.cjz.rpc.constants.RpcConstants;
-import lxg.cjz.rpc.consumer.common.common.future.RPCFuture;
+import lxg.cjz.rpc.consumer.common.future.RPCFuture;
+import lxg.cjz.rpc.consumer.common.context.RpcContext;
 import lxg.cjz.rpc.protocol.RpcProtocol;
 import lxg.cjz.rpc.protocol.enumeration.RpcType;
 import lxg.cjz.rpc.protocol.header.RpcHeader;
@@ -78,15 +78,52 @@ public class RpcConsumerHandler extends SimpleChannelInboundHandler<RpcProtocol<
         }
     }
 
-    public RPCFuture sendRequest(RpcProtocol<RpcRequest> protocol) {
+    public RPCFuture sendRequest(RpcProtocol<RpcRequest> protocol, boolean async, boolean oneWay) {
+        validateChannel();
+        logger.info("client send msg:{}", JSONObject.toJSONString(protocol));
+        return determineSendingMode(protocol, async, oneWay);
+    }
+
+    private RPCFuture determineSendingMode(RpcProtocol<RpcRequest> protocol, boolean async, boolean oneWay) {
+        if (oneWay) {
+            return sendRequestOneWay(protocol);
+        }
+        if (async) {
+            return sendRequestAsync(protocol);
+        }
+        return sendRequestSync(protocol);
+    }
+    private void validateChannel() {
         if (channel == null || !channel.isActive()) {
             //TODO优化点:失败重试和失败抛出异常
-            throw new RpcException("channel is not active or null");
+            throw new RpcException("Channel is either null or not active.");
         }
+    }
+
+    public RPCFuture sendRequestSync(RpcProtocol<RpcRequest> protocol) {
         RPCFuture rpcFuture = this.getRpcFuture(protocol);
-        logger.info("client send msg:{}", JSONObject.toJSONString(protocol));
         channel.writeAndFlush(protocol);
         return rpcFuture;
+    }
+
+    public RPCFuture sendRequestAsync(RpcProtocol<RpcRequest> protocol) {
+        RPCFuture rpcFuture = this.getRpcFuture(protocol);
+        channel.writeAndFlush(protocol).addListener((ChannelFutureListener) future -> {
+            if (future.isSuccess()) {
+                logger.info("client send msg:{}", JSONObject.toJSONString(protocol));
+            } else {
+                logger.error("client send msg error", future.cause());
+                future.channel().close();
+                rpcFuture.done(null);
+            }
+        });
+        RpcContext.getContext().setRpcFuture(rpcFuture);
+        return null;
+    }
+
+    public RPCFuture sendRequestOneWay(RpcProtocol<RpcRequest> protocol) {
+        channel.writeAndFlush(protocol);
+        return null;
     }
 
     private RPCFuture getRpcFuture(RpcProtocol<RpcRequest> protocol) {

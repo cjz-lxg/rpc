@@ -1,7 +1,8 @@
 package lxg.cjz.rpc.test.consumer.handler;
 
 import lxg.cjz.rpc.consumer.common.RpcConsumer;
-import lxg.cjz.rpc.consumer.common.common.future.RPCFuture;
+import lxg.cjz.rpc.consumer.common.callback.AsyncRPCCallback;
+import lxg.cjz.rpc.consumer.common.future.RPCFuture;
 import lxg.cjz.rpc.protocol.RpcProtocol;
 import lxg.cjz.rpc.protocol.header.RpcHeaderFactory;
 import lxg.cjz.rpc.protocol.request.RpcRequest;
@@ -17,9 +18,19 @@ public class RpcConsumerHandlerTest {
     private static final Logger logger = org.slf4j.LoggerFactory.getLogger(RpcConsumerHandlerTest.class);
     public static void main(String[] args) throws Exception {
         RpcConsumer consumer = RpcConsumer.getInstance();
-        RPCFuture result = consumer.sendRequest(getRpcRequestProtocol());
-        logger.info("result:{}", result);
-        //Thread.sleep(2000);
+        RPCFuture rpcFuture = consumer.sendRequest(getRpcRequestProtocol());
+        rpcFuture.addCallback(new AsyncRPCCallback() {
+            @Override
+            public void onSuccess(Object result) {
+                logger.info("从服务消费者获取到的数据===>>>" + result);
+            }
+            @Override
+            public void onException(Exception e) {
+                logger.info("抛出了异常===>>>" + e);
+            }
+        });
+        Thread.sleep(200);
+        //rpcFuture.get();
         consumer.close();
     }
 
