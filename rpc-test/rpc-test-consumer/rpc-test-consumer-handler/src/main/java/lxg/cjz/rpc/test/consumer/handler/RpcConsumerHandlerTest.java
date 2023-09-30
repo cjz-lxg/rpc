@@ -1,11 +1,11 @@
 package lxg.cjz.rpc.test.consumer.handler;
 
 import lxg.cjz.rpc.consumer.common.RpcConsumer;
-import lxg.cjz.rpc.consumer.common.callback.AsyncRPCCallback;
-import lxg.cjz.rpc.consumer.common.future.RPCFuture;
 import lxg.cjz.rpc.protocol.RpcProtocol;
 import lxg.cjz.rpc.protocol.header.RpcHeaderFactory;
 import lxg.cjz.rpc.protocol.request.RpcRequest;
+import lxg.cjz.rpc.proxy.api.callback.AsyncRPCCallback;
+import lxg.cjz.rpc.proxy.api.future.RPCFuture;
 import org.slf4j.Logger;
 
 /**

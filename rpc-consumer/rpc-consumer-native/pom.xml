@@ -5,38 +5,34 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>lxg.cjz.rpc</groupId>
-        <artifactId>rpc</artifactId>
+        <artifactId>rpc-consumer</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>rpc-consumer</artifactId>
-    <packaging>pom</packaging>
-    <modules>
-        <module>rpc-consumer-common</module>
-        <module>rpc-consumer-native</module>
-    </modules>
+    <artifactId>rpc-consumer-native</artifactId>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
     <dependencies>
         <dependency>
             <groupId>lxg.cjz.rpc</groupId>
-            <artifactId>rpc-protocol</artifactId>
+            <artifactId>rpc-consumer-common</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>lxg.cjz.rpc</groupId>
+            <artifactId>rpc-proxy-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>lxg.cjz.rpc</groupId>
-            <artifactId>rpc-codec</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>lxg.cjz.rpc</groupId>
-            <artifactId>rpc-common</artifactId>
-            <version>${project.version}</version>
+            <artifactId>rpc-proxy-jdk</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 
