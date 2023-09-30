@@ -16,7 +16,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * @author russel
@@ -78,7 +80,8 @@ public class RpcConsumer {
         return handler.sendRequest(protocol, protocol.getBody().isAsync(), protocol.getBody().isOneWay());
     }
 
-    private RpcConsumerHandler getRpcConsumerHandler(String server, int port) {
+    private RpcConsumerHandler getRpcConsumerHandler(String server, int port) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
         //TODO 加入连接异常检测机制
         ChannelFuture channelFuture = bootstrap.connect(server, port);
         channelFuture.addListener((ChannelFutureListener) listener -> {
@@ -89,8 +92,11 @@ public class RpcConsumer {
                 channelFuture.cause().printStackTrace();
                 eventLoopGroup.shutdownGracefully();
             }
+            latch.countDown();
         });
-        return channelFuture.channel().pipeline().get(RpcConsumerHandler.class);
+        latch.await();
+        RpcConsumerHandler consumerHandler = channelFuture.channel().pipeline().get(RpcConsumerHandler.class);
+        Objects.requireNonNull(consumerHandler);
+        return consumerHandler;
     }
-
 }
