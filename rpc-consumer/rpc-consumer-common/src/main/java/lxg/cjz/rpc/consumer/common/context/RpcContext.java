@@ -1,6 +1,7 @@
 package lxg.cjz.rpc.consumer.common.context;
 
-import lxg.cjz.rpc.consumer.common.future.RPCFuture;
+
+import lxg.cjz.rpc.proxy.api.future.RPCFuture;
 
 /**
  * @author russel

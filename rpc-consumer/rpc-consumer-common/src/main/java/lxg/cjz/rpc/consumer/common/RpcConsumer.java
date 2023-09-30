@@ -7,11 +7,12 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import lxg.cjz.rpc.common.threadpool.ClientThreadPool;
-import lxg.cjz.rpc.consumer.common.future.RPCFuture;
 import lxg.cjz.rpc.consumer.common.handler.RpcConsumerHandler;
 import lxg.cjz.rpc.consumer.common.initializer.RpcConsumerInitializer;
 import lxg.cjz.rpc.protocol.RpcProtocol;
 import lxg.cjz.rpc.protocol.request.RpcRequest;
+import lxg.cjz.rpc.proxy.api.consumer.Consumer;
+import lxg.cjz.rpc.proxy.api.future.RPCFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +27,7 @@ import java.util.concurrent.CountDownLatch;
  * @date 2023/9/16
  * @description
  */
-public class RpcConsumer {
+public class RpcConsumer implements Consumer {
     private static final Logger logger = LoggerFactory.getLogger(RpcConsumer.class);
     private final Bootstrap bootstrap;
 

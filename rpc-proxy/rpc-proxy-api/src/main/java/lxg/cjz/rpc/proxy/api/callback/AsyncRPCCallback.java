@@ -1,4 +1,4 @@
-package lxg.cjz.rpc.consumer.common.callback;
+package lxg.cjz.rpc.proxy.api.callback;
 
 /**
  * @author russel

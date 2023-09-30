@@ -1,10 +1,10 @@
-package lxg.cjz.rpc.consumer.common.future;
+package lxg.cjz.rpc.proxy.api.future;
 
 import lxg.cjz.rpc.common.threadpool.ClientThreadPool;
-import lxg.cjz.rpc.consumer.common.callback.AsyncRPCCallback;
 import lxg.cjz.rpc.protocol.RpcProtocol;
 import lxg.cjz.rpc.protocol.request.RpcRequest;
 import lxg.cjz.rpc.protocol.response.RpcResponse;
+import lxg.cjz.rpc.proxy.api.callback.AsyncRPCCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
