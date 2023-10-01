@@ -1,6 +1,8 @@
 package lxg.cjz.rpc;
 
 import lxg.cjz.rpc.consumer.common.RpcConsumer;
+import lxg.cjz.rpc.proxy.api.async.IAsyncObjectProxy;
+import lxg.cjz.rpc.proxy.api.object.ObjectProxy;
 import lxg.cjz.rpc.proxy.jdk.JdkProxyFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +44,10 @@ public class RpcClient {
     public <T> T create(Class<T> interfaceClass) {
         JdkProxyFactory<T> jdkProxyFactory = new JdkProxyFactory<T>(serviceVersion, serviceGroup, serializationType, timeout, RpcConsumer.getInstance(), async, oneway);
         return jdkProxyFactory.getProxy(interfaceClass);
+    }
+
+    public <T> IAsyncObjectProxy createAsync(Class<T> interfaceClass) {
+        return new ObjectProxy<T>(interfaceClass, serviceVersion, serviceGroup, timeout, RpcConsumer.getInstance(), serializationType, async, oneway);
     }
 
     public void shutdown() {
