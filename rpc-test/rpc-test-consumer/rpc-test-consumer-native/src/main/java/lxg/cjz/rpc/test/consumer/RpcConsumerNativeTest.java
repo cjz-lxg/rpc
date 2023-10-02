@@ -21,7 +21,7 @@ public class RpcConsumerNativeTest {
 
     @Test
     public void testAsyncInterFacRpc() throws Exception {
-RpcClient rpcClient = new RpcClient("1.0.0", "cjz", "jdk", 3000, true, false);
+RpcClient rpcClient = new RpcClient("1.0.0", "cjz", "jdk", 3000, false, false);
         IAsyncObjectProxy demoService = rpcClient.createAsync(DemoService.class);
         RPCFuture future = demoService.call("hello", "cjz");
         logger.info("返回的结果数据===>>> " + future.get());
